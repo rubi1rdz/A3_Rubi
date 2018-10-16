@@ -4,3 +4,4 @@ Here the link to my dashboard  https://stanford.maps.arcgis.com/apps/opsdashboar
 
 - Median Household Income and Contract Rent
 
+![Dashboard_Rubi](Dashboard_Rubi.png)
