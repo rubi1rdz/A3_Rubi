@@ -1,0 +1,99 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(rmarkdown)
+library(readr)
+library(dplyr)
+library(tidyr)
+library(censusapi)
+
+Sys.setenv(CENSUS_KEY="dfd9e77e878a7d5de16ae97ebe4e035fff360d2c")
+
+incometract16 <- getCensus(name = "acs/acs5", vintage = "2016", vars = "B19013_001E",
+region = "tract:*", regionin = "state:06+county:001,013,041,055,075,081,085,095,097")
+
+```
+
+```{r}
+
+colnames(incometract16)[4] <- "Tract"
+
+
+```
+
+```{r}
+incomecounty16 <- getCensus(name = "acs/acs5", vintage = "2016", vars = "B19013_001E",
+region = "county:001,013,041,055,075,081,085,095,097", regionin = "state:06")
+
+```
+
+```{r}
+
+colnames(incomecounty16)[3] <- "County"
+```
+
+```{r}
+income <- incometract16 %>% select("county","Tract")
+```
+
+```{r}
+income$FIPS <- paste(incometract16$state,incometract16$county,incometract16$tract,sep="")
+
+```
+
+```{r}
+income <- income %>% left_join(incomecounty16 %>% select("county","County"), by = c("county" = "county"))
+
+```
+
+```{r}
+income$"Bay Area" <- 86990.1
+income <- income %>% filter(Tract > 0)
+```
+
+```{r}
+write.csv(income, file = "income.csv")
+```
+
+
+For new variable (Contract Rent "B25056_001E")
+
+```{r}
+renttract16 <- getCensus(name = "acs/acs5", vintage = "2016", vars = "B25056_001E",
+region = "tract:*", regionin = "state:06+county:001,013,041,055,075,081,085,095,097")
+
+colnames(renttract16)[4] <- "RTract"
+
+rentcounty16 <- getCensus(name = "acs/acs5", vintage = "2016", vars = "B25056_001E",
+region = "county:001,013,041,055,075,081,085,095,097", regionin = "state:06")
+
+colnames(rentcounty16)[3] <- "RCounty"
+
+rent <- renttract16 %>% select("county","RTract")
+rent$FIPS <- paste(renttract16$state,renttract16$county,renttract16$tract,sep="")
+
+rent <- rent %>% left_join(rentcounty16 %>% select("county","RCounty"), by = c("county" = "county"))
+
+rent$"RentBayArea" <- 1985.64
+rent <- rent %>% filter(RTract > 0)
+
+write.csv(rent, file = "rent.csv")
+```
+
+```{r}
+summary (income$Tract)
+summary(rent$RTract)
+```
+
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
